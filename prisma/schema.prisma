@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @default(autoincrement()) @id
+  name      String
+  password  String
+  email     String   @unique
+  rol       Rol      @relation(fields: [rolId], references: [id])
+  rolId     Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  request  RequestBooks[]
+  borrow   BorrowBooks[]
+}
+
+model Rol {
+  id        Int      @default(autoincrement()) @id
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User[]
+}
+
+model Books {
+  id        Int      @default(autoincrement()) @id
+  title     String
+  author    String
+  year_of_publication DateTime
+  category  Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  cover_image String
+  isActive  Boolean  @default(true)
+  isAvailable Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  request  RequestBooks[]
+  borrow   BorrowBooks[]
+}
+
+model Category {
+  id        Int      @default(autoincrement()) @id
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Books     Books[]
+}
+
+model RequestBooks {
+    id        Int      @default(autoincrement()) @id
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
+    book      Books    @relation(fields: [bookId], references: [id])
+    bookId    Int
+    requestDate DateTime
+
+}
+
+model BorrowBooks {
+    id        Int      @default(autoincrement()) @id
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
+    book      Books    @relation(fields: [bookId], references: [id])
+    bookId    Int
+    borrowDate DateTime
+    returnDate DateTime?
+}
