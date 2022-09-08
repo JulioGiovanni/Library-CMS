@@ -1,21 +1,36 @@
 import express from 'express';
 import {
-  borrowBook,
+  searchBooks,
   createBook,
-  deleteBook,
-  getBook,
   getBooks,
-  requestBook,
+  getBook,
   updateBook,
-} from '../controllers/booksController';
-
+  deleteBook,
+  enableBook,
+  borrowBook,
+  requestBook,
+  getRequestedBooks,
+  returnBook,
+  countBooks,
+  countAvailableBooks,
+  countBorrowedBooks,
+  getBorrowedBooks,
+} from '../controllers/booksController.js';
+import { upload } from '../utils/multer.js';
 //Create the router
 const router = express.Router();
-
+router.get('/search-books', searchBooks);
 router.get('/books', getBooks);
+router.get('/count-books', countBooks);
 router.get('/books/:id', getBook);
-router.post('/books', createBook);
+router.post('/books', upload.single('image'), createBook);
 router.put('/books/:id', updateBook);
+router.put('/enable-books/:id', enableBook);
+router.get('/borrowed-books', getBorrowedBooks);
+router.get('/count-borrowed-books', countBorrowedBooks);
+router.get('/count-available-books', countAvailableBooks);
+router.post('/return-book/:id', returnBook);
+router.get('/requested-books', getRequestedBooks);
 router.delete('/books/:id', deleteBook);
 router.post('/request-book/:id', requestBook);
 router.post('/borrow-book/:id', borrowBook);

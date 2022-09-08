@@ -1,37 +1,91 @@
-const { PrismaClient } = require('@prisma/client');
-
+import { PrismaClient } from '@prisma/client';
+import path from 'path'; //Para usar las rutas de archivos
 const prisma = new PrismaClient();
 
-//Create a new book
-export const createBook = async (req, res) => {
-  const { title, author, year, category } = req.body;
+//Search books by title
+export const searchBooks = async (req, res) => {
+  const { title } = req.query;
+  const { page = 1, limit = 4 } = req.query;
+  const offset = page * limit - limit;
   try {
-    const book = await prisma.books.create({
-      title,
-      author,
-      year_of_publication: year,
-      categoryId: category,
-      cover_image: req.file.path,
+    const total = await prisma.books.count({
+      where: {
+        title: {
+          contains: title,
+        },
+      },
     });
-
+    const books = await prisma.book.findMany({
+      skip: offset,
+      take: limit,
+      where: {
+        title: {
+          contains: title,
+        },
+      },
+    });
     await prisma.$disconnect();
-    return res.status(201).json(book);
+    res.json({ data: books, pages: Math.ceil(total / limit) });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
   }
 };
 
+//Create a new book
+export const createBook = async (req, res) => {
+  const { title, author, year, category } = req.body;
+  try {
+    const name = req.file.originalname.split('.');
+    const book = await prisma.books.create({
+      data: {
+        title,
+        author,
+        year_of_publication: Number(year),
+        categoryId: Number(category),
+        cover_image:
+          'src/public/uploads/' +
+          name[0] +
+          '-' +
+          path.extname(req.file.originalname),
+        isActive: true,
+        isAvailable: true,
+        createdAt: new Date(),
+      },
+    });
+
+    await prisma.$disconnect();
+    return res.status(201).json(book);
+  } catch (error) {
+    await prisma.$disconnect();
+    console.log(error);
+    res.status(500).json({ message: error });
+  }
+};
+
 //Get all books that are active
 export const getBooks = async (req, res) => {
+  const { page = 1, limit = 4 } = req.query;
+  const offset = page * limit - limit;
+
   try {
+    const total = await prisma.books.count({
+      where: {
+        isActive: true,
+      },
+    });
+
     const books = await prisma.books.findMany({
+      skip: offset,
+      take: limit,
       where: {
         isActive: true,
       },
     });
     await prisma.$disconnect();
-    return res.status(200).json(books);
+    return res
+      .status(200)
+      .json({ data: books, pages: Math.ceil(total / limit) });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
@@ -91,6 +145,26 @@ export const deleteBook = async (req, res) => {
       },
       data: {
         isActive: false,
+      },
+    });
+    await prisma.$disconnect();
+    return res.status(200).json(book);
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+
+//Enable a book
+export const enableBook = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const book = await prisma.books.update({
+      where: {
+        id: Number(id),
+      },
+      data: {
+        isActive: true,
       },
     });
     await prisma.$disconnect();
@@ -170,6 +244,21 @@ export const requestBook = async (req, res) => {
   }
 };
 
+//Get the requested books
+export const getRequestedBooks = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const requestedBooks = await prisma.requested_books.findMany({
+      orderBy: { requestDate: 'desc' },
+    });
+    await prisma.$disconnect();
+    return res.status(200).json(requestedBooks);
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+
 //Return a book, only an admin can return a book
 export const returnBook = async (req, res) => {
   const { id } = req.params;
@@ -192,6 +281,83 @@ export const returnBook = async (req, res) => {
     });
     await prisma.$disconnect();
     return res.status(200).json({ book, borrow });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+
+//Count books
+export const countBooks = async (req, res) => {
+  try {
+    const books = await prisma.books.count();
+    await prisma.$disconnect();
+    return res.status(200).json(books);
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+
+//Count available books
+export const countAvailableBooks = async (req, res) => {
+  try {
+    const books = await prisma.books.count({
+      where: {
+        isAvailable: true,
+      },
+    });
+    await prisma.$disconnect();
+    return res.status(200).json(books);
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+
+//Count borrowed books by a user
+export const countBorrowedBooks = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const books = await prisma.borrowed_books.count({
+      where: {
+        userId: Number(id),
+      },
+    });
+    await prisma.$disconnect();
+    return res.status(200).json(books);
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+
+//Get books borrowed by a user
+export const getBorrowedBooks = async (req, res) => {
+  const { page = 1, limit = 4 } = req.query;
+  const offset = page * limit - limit;
+  const { id } = req.params;
+  try {
+    const total = await prisma.borrowed_books.count({
+      where: {
+        userId: Number(id),
+      },
+    });
+
+    const borrowedBooks = await prisma.borrowed_books.findMany({
+      skip: offset,
+      take: limit,
+      where: {
+        userId: Number(id),
+      },
+      include: {
+        books: true,
+      },
+    });
+    await prisma.$disconnect();
+    return res
+      .status(200)
+      .json({ data: borrowedBooks, pages: Math.ceil(total / limit) });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();

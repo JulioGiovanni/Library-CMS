@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
@@ -38,8 +38,18 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
   const { email, password, name } = req.body;
   try {
+    const emailFound = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (emailFound) {
+      return res
+        .status(400)
+        .json({ message: 'Email already exists' });
+    }
     const hashedPassword = await bcrypt.hash(password, 12);
-    const result = await prisma.users.create({
+    const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
@@ -47,10 +57,11 @@ export const register = async (req, res) => {
       },
     });
     await prisma.$disconnect();
-    return res.status(200).json(result);
+    return res.status(200).json(user);
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    return res.status(500).json({ message: 'Something went wrong' });
   }
 };
 
