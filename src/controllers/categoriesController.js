@@ -6,12 +6,12 @@ export const getCategories = async (req, res) => {
   const { page = 1, limit = 4 } = req.query;
   const offset = page * limit - limit;
   try {
-    const total = await prisma.categories.count({
+    const total = await prisma.category.count({
       where: {
         isActive: true,
       },
     });
-    const categories = await prisma.categories.findMany({
+    const categories = await prisma.category.findMany({
       skip: offset,
       take: limit,
       where: {
@@ -33,7 +33,7 @@ export const getCategories = async (req, res) => {
 export const disableCategory = async (req, res) => {
   const { id } = req.params;
   try {
-    const category = await prisma.categories.update({
+    const category = await prisma.category.update({
       where: {
         id: Number(id),
       },
@@ -54,7 +54,7 @@ export const disableCategory = async (req, res) => {
 export const enableCategory = async (req, res) => {
   const { id } = req.params;
   try {
-    const category = await prisma.categories.update({
+    const category = await prisma.category.update({
       where: {
         id: Number(id),
       },
@@ -76,7 +76,7 @@ export const updateCategory = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
   try {
-    const category = await prisma.categories.update({
+    const category = await prisma.category.update({
       where: {
         id: Number(id),
       },
@@ -96,7 +96,7 @@ export const updateCategory = async (req, res) => {
 //Count categories
 export const countCategories = async (req, res) => {
   try {
-    const categories = await prisma.categories.count();
+    const categories = await prisma.category.count({});
     await prisma.$disconnect();
     return res.status(200).json(categories);
   } catch (error) {

@@ -15,7 +15,7 @@ export const searchBooks = async (req, res) => {
         },
       },
     });
-    const books = await prisma.book.findMany({
+    const books = await prisma.books.findMany({
       skip: offset,
       take: limit,
       where: {
@@ -127,7 +127,6 @@ export const getBook = async (req, res) => {
     const book = await prisma.books.findUnique({
       where: {
         id: Number(id),
-        isActive: true,
       },
     });
     await prisma.$disconnect();
@@ -143,6 +142,7 @@ export const getBook = async (req, res) => {
 export const updateBook = async (req, res) => {
   const { id } = req.params;
   const { title, author, year, category } = req.body;
+  const name = req.file.originalname.split('.');
   try {
     const book = await prisma.books.update({
       where: {
@@ -151,9 +151,13 @@ export const updateBook = async (req, res) => {
       data: {
         title,
         author,
-        year_of_publication: year,
-        categoryId: category,
-        cover_image: req.file.path,
+        year_of_publication: Number(year),
+        categoryId: Number(category),
+        cover_image:
+          'src/public/uploads/' +
+          name[0] +
+          '-' +
+          path.extname(req.file.originalname),
       },
     });
     await prisma.$disconnect();

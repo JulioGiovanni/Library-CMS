@@ -7,7 +7,7 @@ export const getUsers = async (req, res) => {
   const { page = 1, limit = 4 } = req.query;
   const offset = page * limit - limit;
   try {
-    const total = await prisma.users.count({
+    const total = await prisma.user.count({
       where: {
         isActive: true,
       },
@@ -58,7 +58,7 @@ export const updateUser = async (req, res) => {
   try {
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 12);
-      const user = await prisma.users.update({
+      const user = await prisma.user.update({
         where: {
           id: Number(id),
         },
@@ -71,7 +71,7 @@ export const updateUser = async (req, res) => {
       await prisma.$disconnect();
       return res.status(200).json(user);
     }
-    const user = await prisma.users.update({
+    const user = await prisma.user.update({
       where: {
         id: Number(id),
       },
@@ -92,7 +92,7 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await prisma.users.update({
+    const user = await prisma.user.update({
       where: {
         id: Number(id),
       },
@@ -112,7 +112,7 @@ export const deleteUser = async (req, res) => {
 export const enableUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await prisma.users.update({
+    const user = await prisma.user.update({
       where: {
         id: Number(id),
       },
