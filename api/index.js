@@ -1,4 +1,4 @@
-import app from './serverConfig.js';
+import app from '../src/serverConfig.js';
 
 function main() {
   app.listen(app.get('port'), () => {
