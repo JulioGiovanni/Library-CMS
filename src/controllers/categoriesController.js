@@ -25,6 +25,7 @@ export const getCategories = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -45,6 +46,7 @@ export const disableCategory = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -65,6 +67,7 @@ export const enableCategory = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -86,6 +89,7 @@ export const updateCategory = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -98,5 +102,6 @@ export const countCategories = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };

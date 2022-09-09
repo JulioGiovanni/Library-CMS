@@ -4,9 +4,8 @@ const prisma = new PrismaClient();
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log('first');
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
         email,
       },
@@ -33,6 +32,7 @@ export const login = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    return res.status(500).json({ message: error });
   }
 };
 
@@ -62,7 +62,7 @@ export const register = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
-    return res.status(500).json({ message: 'Something went wrong' });
+    return res.status(500).json({ message: error });
   }
 };
 

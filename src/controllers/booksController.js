@@ -29,6 +29,7 @@ export const searchBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -90,6 +91,7 @@ export const getBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 //Get all books available or not available, active or not active
@@ -114,6 +116,7 @@ export const getAllBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -132,6 +135,7 @@ export const getBook = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -157,6 +161,7 @@ export const updateBook = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -177,6 +182,7 @@ export const deleteBook = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -197,6 +203,7 @@ export const enableBook = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -235,6 +242,7 @@ export const borrowBook = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -267,6 +275,7 @@ export const requestBook = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -302,6 +311,7 @@ export const getRequestedBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -337,6 +347,7 @@ export const getBorrowedBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -365,6 +376,7 @@ export const returnBook = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -377,6 +389,7 @@ export const countBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -393,6 +406,7 @@ export const countAvailableBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -410,6 +424,7 @@ export const countBorrowedBooks = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -442,5 +457,6 @@ export const getBorrowedBooksByUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };

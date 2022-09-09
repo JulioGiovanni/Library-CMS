@@ -27,6 +27,7 @@ export const getUsers = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -84,6 +85,7 @@ export const updateUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -103,6 +105,7 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
 
@@ -122,5 +125,6 @@ export const enableUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
+    res.status(500).json({ message: error });
   }
 };
