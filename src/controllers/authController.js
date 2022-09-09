@@ -4,8 +4,9 @@ const prisma = new PrismaClient();
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log('first');
   try {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         email,
       },
@@ -20,15 +21,15 @@ export const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const token = jwt.sign(
-      { email: user.email, id: user.id },
-      'test',
-      {
-        expiresIn: '1h',
-      }
-    );
+    // const token = jwt.sign(
+    //   { email: user.email, id: user.id },
+    //   'test',
+    //   {
+    //     expiresIn: '1h',
+    //   }
+    // );
     await prisma.$disconnect();
-    return res.status(200).json({ result: user, token });
+    return res.status(200).json(user);
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
