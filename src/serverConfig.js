@@ -14,6 +14,7 @@ const __dirname = path.dirname(__filename); //Para obtener el directorio del arc
 import router from './routes/books.routes.js';
 import router2 from './routes/user.routes.js';
 import router3 from './routes/auth.routes.js';
+import router4 from './routes/categories.routes.js';
 
 //Instancia del servidor
 const app = express(); //Esto inicia el servidor y lo iguala a la variable app
@@ -30,5 +31,6 @@ app.use(express.json()); //Para que se puedan enviar datos en formato json
 app.use('/', router); //Para que se puedan usar las rutas
 app.use('/', router2); //Para que se puedan usar las rutas
 app.use('/', router3); //Para que se puedan usar las rutas
+app.use('/', router4); //Para que se puedan usar las rutas
 
 export default app; //Exportamos la variable app para usarla en nuestro server.js

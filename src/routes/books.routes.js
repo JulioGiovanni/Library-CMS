@@ -16,12 +16,14 @@ import {
   countBorrowedBooks,
   getBorrowedBooks,
   getBorrowedBooksByUser,
+  getAllBooks,
 } from '../controllers/booksController.js';
 import { upload } from '../utils/multer.js';
 //Create the router
 const router = express.Router();
 router.get('/search-books', searchBooks);
 router.get('/books', getBooks);
+router.get('/all-books', getAllBooks);
 router.get('/count-books', countBooks);
 router.get('/books/:id', getBook);
 router.post('/books', upload.single('image'), createBook);

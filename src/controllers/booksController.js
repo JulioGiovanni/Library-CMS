@@ -72,8 +72,33 @@ export const getBooks = async (req, res) => {
     const total = await prisma.books.count({
       where: {
         isActive: true,
+        isAvailable: true,
       },
     });
+
+    const books = await prisma.books.findMany({
+      skip: offset,
+      take: limit,
+      where: {
+        isActive: true,
+      },
+    });
+    await prisma.$disconnect();
+    return res
+      .status(200)
+      .json({ data: books, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+//Get all books available or not available, active or not active
+export const getAllBooks = async (req, res) => {
+  const { page = 1, limit = 4 } = req.query;
+  const offset = page * limit - limit;
+
+  try {
+    const total = await prisma.books.count({});
 
     const books = await prisma.books.findMany({
       skip: offset,
