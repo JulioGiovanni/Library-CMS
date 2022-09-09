@@ -217,6 +217,7 @@ export const borrowBook = async (req, res) => {
 export const requestBook = async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
+
   try {
     const AvailableBook = await prisma.books.findFirst({
       where: {
@@ -247,12 +248,67 @@ export const requestBook = async (req, res) => {
 //Get the requested books
 export const getRequestedBooks = async (req, res) => {
   const { id } = req.params;
+  const { page = 1, limit = 4 } = req.query;
+  const offset = page * limit - limit;
   try {
     const requestedBooks = await prisma.requested_books.findMany({
+      skip: offset,
+      take: limit,
       orderBy: { requestDate: 'desc' },
+      select: {
+        book: {
+          select: {
+            title: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
     await prisma.$disconnect();
-    return res.status(200).json(requestedBooks);
+    return res.status(200).json({
+      data: requestedBooks,
+      pages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+};
+
+//Get borrowed books
+export const getBorrowedBooks = async (req, res) => {
+  const { id } = req.params;
+  const { page = 1, limit = 4 } = req.query;
+  const offset = page * limit - limit;
+  try {
+    const borrowedBooks = await prisma.borrowed_books.findMany({
+      skip: offset,
+      take: limit,
+      orderBy: { requestDate: 'desc' },
+      select: {
+        book: {
+          select: {
+            title: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+    await prisma.$disconnect();
+    return res.status(200).json({
+      data: borrowedBooks,
+      pages: Math.ceil(total / limit),
+    });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
@@ -333,7 +389,7 @@ export const countBorrowedBooks = async (req, res) => {
 };
 
 //Get books borrowed by a user
-export const getBorrowedBooks = async (req, res) => {
+export const getBorrowedBooksByUser = async (req, res) => {
   const { page = 1, limit = 4 } = req.query;
   const offset = page * limit - limit;
   const { id } = req.params;

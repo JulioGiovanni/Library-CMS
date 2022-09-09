@@ -15,6 +15,7 @@ import {
   countAvailableBooks,
   countBorrowedBooks,
   getBorrowedBooks,
+  getBorrowedBooksByUser,
 } from '../controllers/booksController.js';
 import { upload } from '../utils/multer.js';
 //Create the router
@@ -27,6 +28,7 @@ router.post('/books', upload.single('image'), createBook);
 router.put('/books/:id', updateBook);
 router.put('/enable-books/:id', enableBook);
 router.get('/borrowed-books', getBorrowedBooks);
+router.get('borrowed-books/:id', getBorrowedBooksByUser);
 router.get('/count-borrowed-books', countBorrowedBooks);
 router.get('/count-available-books', countAvailableBooks);
 router.post('/return-book/:id', returnBook);
