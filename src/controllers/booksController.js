@@ -85,9 +85,11 @@ export const getBooks = async (req, res) => {
       },
     });
     await prisma.$disconnect();
-    return res
-      .status(200)
-      .json({ data: books, pages: Math.ceil(total / limit), total:total });
+    return res.status(200).json({
+      data: books,
+      pages: Math.ceil(total / limit),
+      total: total,
+    });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
@@ -266,15 +268,15 @@ export const requestBook = async (req, res) => {
         .status(400)
         .json({ message: 'Book is not Avalaible' });
     }
-    
+
     //Find if the same user is registered with the same book
     const FindRequest = await prisma.requestBooks.findFirst({
       where: {
-        userId: userId,
-        bookId: id,
+        userId: Number(userId),
+        bookId: Number(id),
       },
     });
-    if(FindRequest){
+    if (FindRequest) {
       return res
         .status(400)
         .json({ message: 'You have already requested this book' });
@@ -282,9 +284,9 @@ export const requestBook = async (req, res) => {
 
     const request = await prisma.requestBooks.create({
       data: {
-        userId: userId,
-        bookId: id,
-        date_requested: new Date(),
+        userId,
+        bookId: Number(id),
+        requestDate: new Date(),
       },
     });
     await prisma.$disconnect();
@@ -308,6 +310,7 @@ export const getRequestedBooks = async (req, res) => {
       take: limit,
       orderBy: { requestDate: 'desc' },
       select: {
+        id: true,
         book: {
           select: {
             title: true,
@@ -465,13 +468,34 @@ export const getBorrowedBooksByUser = async (req, res) => {
         userId: Number(id),
       },
       include: {
-        books: true,
+        book: true,
       },
     });
     await prisma.$disconnect();
     return res
       .status(200)
       .json({ data: borrowedBooks, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+    res.status(500).json({ message: error });
+  }
+};
+
+export const isRequested = async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+  try {
+    const request = await prisma.requestBooks.findMany({
+      where: {
+        userId: Number(userId),
+        bookId: Number(id),
+      },
+    });
+    if (request.length > 0) {
+      return res.status(200).json(true);
+    }
+    return res.status(200).json(false);
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
