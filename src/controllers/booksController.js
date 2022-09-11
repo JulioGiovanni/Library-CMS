@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import path from 'path'; //Para usar las rutas de archivos
+import { uploadImage } from '../utils/cloudinary.js';
 const prisma = new PrismaClient();
 
 //Search books by title
@@ -38,17 +39,20 @@ export const createBook = async (req, res) => {
   const { title, author, year, category } = req.body;
   try {
     const name = req.file.originalname.split('.');
+    const image =
+      'src/public/uploads/' +
+      name[0] +
+      '-' +
+      path.extname(req.file.originalname);
+    console.log(req.file);
+    const urlImage = await uploadImage(image);
     const book = await prisma.books.create({
       data: {
         title,
         author,
         year_of_publication: Number(year),
         categoryId: Number(category),
-        cover_image:
-          'src/public/uploads/' +
-          name[0] +
-          '-' +
-          path.extname(req.file.originalname),
+        cover_image: urlImage.secure_url,
         isActive: true,
         isAvailable: true,
         createdAt: new Date(),
@@ -144,7 +148,15 @@ export const getBook = async (req, res) => {
 export const updateBook = async (req, res) => {
   const { id } = req.params;
   const { title, author, year, category } = req.body;
+
   const name = req.file.originalname.split('.');
+  const image =
+    'src/public/uploads/' +
+    name[0] +
+    '-' +
+    path.extname(req.file.originalname);
+  console.log(req.file);
+  const urlImage = await uploadImage(image);
   try {
     const book = await prisma.books.update({
       where: {
@@ -155,11 +167,7 @@ export const updateBook = async (req, res) => {
         author,
         year_of_publication: Number(year),
         categoryId: Number(category),
-        cover_image:
-          'src/public/uploads/' +
-          name[0] +
-          '-' +
-          path.extname(req.file.originalname),
+        cover_image: urlImage.secure_url,
       },
     });
     await prisma.$disconnect();

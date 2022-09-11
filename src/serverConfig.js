@@ -4,7 +4,6 @@ import path from 'path'; //Para usar las rutas de archivos
 import { fileURLToPath } from 'url';
 import morgan from 'morgan'; //Para ver las peticiones
 import cors from 'cors'; //Para permitir el acceso a otros servidores
-
 const __filename = fileURLToPath(import.meta.url); //Para obtener el nombre del archivo
 
 const __dirname = path.dirname(__filename); //Para obtener el directorio del archivo
