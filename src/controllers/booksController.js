@@ -216,11 +216,16 @@ export const enableBook = async (req, res) => {
 //Borrow a book. Only an admin can borrow a book
 export const borrowBook = async (req, res) => {
   const { id } = req.params;
-  const { userId } = req.body;
   try {
-    const AvailableBook = await prisma.books.findFirst({
+    const request = await prisma.requestBooks.findFirst({
       where: {
         id: Number(id),
+      },
+    });
+
+    const AvailableBook = await prisma.books.findFirst({
+      where: {
+        id: Number(request.bookId),
       },
     });
     if (!AvailableBook.isAvailable) {
@@ -228,9 +233,10 @@ export const borrowBook = async (req, res) => {
         .status(400)
         .json({ message: 'Book is not available' });
     }
-    const book = await prisma.books.update({
+
+    await prisma.books.update({
       where: {
-        id: Number(id),
+        id: Number(request.bookId),
       },
       data: {
         isAvailable: false,
@@ -238,13 +244,14 @@ export const borrowBook = async (req, res) => {
     });
     const borrow = await prisma.borrowBooks.create({
       data: {
-        userId: userId,
-        bookId: id,
-        date_borrowed: new Date(),
+        userId: request.userId,
+        bookId: request.bookId,
+        borrowDate: new Date(),
       },
     });
+    await prisma.requestBooks.delete({ where: { id: request.id } });
     await prisma.$disconnect();
-    return res.status(200).json({ book, borrow });
+    return res.status(200).json({ data: borrow });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
@@ -256,7 +263,6 @@ export const borrowBook = async (req, res) => {
 export const requestBook = async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
-
   try {
     const AvailableBook = await prisma.books.findFirst({
       where: {
@@ -328,6 +334,7 @@ export const getRequestedBooks = async (req, res) => {
     return res.status(200).json({
       data: requestedBooks,
       pages: Math.ceil(total / limit),
+      total,
     });
   } catch (error) {
     console.log(error);
@@ -342,10 +349,18 @@ export const getBorrowedBooks = async (req, res) => {
   const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
   try {
+    const total = await prisma.borrowBooks.count({
+      where: {
+        returnDate: null,
+      },
+    });
     const borrowedBooks = await prisma.borrowBooks.findMany({
       skip: offset,
       take: limit,
-      orderBy: { requestDate: 'desc' },
+      orderBy: { borrowDate: 'desc' },
+      where: {
+        returnDate: null,
+      },
       select: {
         book: {
           select: {
@@ -364,6 +379,7 @@ export const getBorrowedBooks = async (req, res) => {
     return res.status(200).json({
       data: borrowedBooks,
       pages: Math.ceil(total / limit),
+      total,
     });
   } catch (error) {
     console.log(error);
@@ -376,9 +392,15 @@ export const getBorrowedBooks = async (req, res) => {
 export const returnBook = async (req, res) => {
   const { id } = req.params;
   try {
-    const book = await prisma.books.update({
+    const borrowedBook = await prisma.borrowBooks.findFirst({
       where: {
         id: Number(id),
+      },
+    });
+
+    await prisma.books.update({
+      where: {
+        id: Number(borrowedBook.bookId),
       },
       data: {
         isAvailable: true,
@@ -386,14 +408,14 @@ export const returnBook = async (req, res) => {
     });
     const borrow = await prisma.borrowBooks.update({
       where: {
-        bookId: Number(id),
+        id: Number(id),
       },
       data: {
-        returnedDate: new Date(),
+        returnDate: new Date(),
       },
     });
     await prisma.$disconnect();
-    return res.status(200).json({ book, borrow });
+    return res.status(200).json({ data: borrow });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
@@ -458,6 +480,7 @@ export const getBorrowedBooksByUser = async (req, res) => {
     const total = await prisma.borrowBooks.count({
       where: {
         userId: Number(id),
+        returnDate: null,
       },
     });
 
@@ -466,6 +489,7 @@ export const getBorrowedBooksByUser = async (req, res) => {
       take: limit,
       where: {
         userId: Number(id),
+        returnDate: null,
       },
       include: {
         book: true,
@@ -475,6 +499,45 @@ export const getBorrowedBooksByUser = async (req, res) => {
     return res
       .status(200)
       .json({ data: borrowedBooks, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+    res.status(500).json({ message: error });
+  }
+};
+
+export const getReturnedBooks = async (req, res) => {
+  const { page = 1, limit = 12 } = req.query;
+  const offset = page * limit - limit;
+  try {
+    const total = await prisma.borrowBooks.count({
+      where: {
+        returnDate: {
+          not: null,
+        },
+      },
+    });
+
+    const returnedBooks = await prisma.borrowBooks.findMany({
+      skip: offset,
+      take: limit,
+      where: {
+        returnDate: {
+          not: null,
+        },
+      },
+      include: {
+        book: true,
+      },
+    });
+    await prisma.$disconnect();
+    return res
+      .status(200)
+      .json({
+        data: returnedBooks,
+        pages: Math.ceil(total / limit),
+        total,
+      });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();

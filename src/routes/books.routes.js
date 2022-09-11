@@ -18,6 +18,7 @@ import {
   getBorrowedBooksByUser,
   getAllBooks,
   isRequested,
+  getReturnedBooks,
 } from '../controllers/booksController.js';
 import { upload } from '../utils/multer.js';
 //Create the router
@@ -41,5 +42,6 @@ router.post('/request-book/:id', requestBook);
 router.post('/borrow-book/:id', borrowBook);
 router.post('/return-book/:id', requestBook);
 router.get('/is-requested/:id', isRequested);
+router.get('/returned-books', getReturnedBooks);
 
 export default router;
