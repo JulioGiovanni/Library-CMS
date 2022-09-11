@@ -4,11 +4,12 @@ const prisma = new PrismaClient();
 
 //Get all active users
 export const getUsers = async (req, res) => {
-  const { page = 1, limit = 4 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
   try {
     const total = await prisma.user.count({
       where: {
+        rolId: 2,//Only users, not admins
         isActive: true,
       },
     });
@@ -17,13 +18,14 @@ export const getUsers = async (req, res) => {
       skip: offset,
       take: limit,
       where: {
+        rolId: 2,//Only users, not admins
         isActive: true,
       },
     });
     await prisma.$disconnect();
     return res
       .status(200)
-      .json({ data: users, pages: Math.ceil(total / limit) });
+      .json({ data: users, pages: Math.ceil(total / limit), total:total });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();

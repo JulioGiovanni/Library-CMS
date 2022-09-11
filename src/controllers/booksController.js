@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 //Search books by title
 export const searchBooks = async (req, res) => {
   const { title } = req.query;
-  const { page = 1, limit = 4 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
   try {
     const total = await prisma.books.count({
@@ -66,7 +66,7 @@ export const createBook = async (req, res) => {
 
 //Get all books that are active
 export const getBooks = async (req, res) => {
-  const { page = 1, limit = 4 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
 
   try {
@@ -87,7 +87,7 @@ export const getBooks = async (req, res) => {
     await prisma.$disconnect();
     return res
       .status(200)
-      .json({ data: books, pages: Math.ceil(total / limit) });
+      .json({ data: books, pages: Math.ceil(total / limit), total:total });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
@@ -96,7 +96,7 @@ export const getBooks = async (req, res) => {
 };
 //Get all books available or not available, active or not active
 export const getAllBooks = async (req, res) => {
-  const { page = 1, limit = 4 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
 
   try {
@@ -266,6 +266,19 @@ export const requestBook = async (req, res) => {
         .status(400)
         .json({ message: 'Book is not Avalaible' });
     }
+    
+    //Find if the same user is registered with the same book
+    const FindRequest = await prisma.requestBooks.findFirst({
+      where: {
+        userId: userId,
+        bookId: id,
+      },
+    });
+    if(FindRequest){
+      return res
+        .status(400)
+        .json({ message: 'You have already requested this book' });
+    }
 
     const request = await prisma.requestBooks.create({
       data: {
@@ -286,7 +299,7 @@ export const requestBook = async (req, res) => {
 //Get the requested books
 export const getRequestedBooks = async (req, res) => {
   const { id } = req.params;
-  const { page = 1, limit = 4 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
   try {
     const total = await prisma.requestBooks.count();
@@ -323,7 +336,7 @@ export const getRequestedBooks = async (req, res) => {
 //Get borrowed books
 export const getBorrowedBooks = async (req, res) => {
   const { id } = req.params;
-  const { page = 1, limit = 4 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
   try {
     const borrowedBooks = await prisma.borrowBooks.findMany({
@@ -435,7 +448,7 @@ export const countBorrowedBooks = async (req, res) => {
 
 //Get books borrowed by a user
 export const getBorrowedBooksByUser = async (req, res) => {
-  const { page = 1, limit = 4 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
   const offset = page * limit - limit;
   const { id } = req.params;
   try {

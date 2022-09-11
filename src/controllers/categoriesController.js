@@ -3,25 +3,20 @@ const prisma = new PrismaClient();
 
 //Get all categories
 export const getCategories = async (req, res) => {
-  const { page = 1, limit = 4 } = req.query;
-  const offset = page * limit - limit;
+  // const { page = 1, limit = 12 } = req.query;
+  // const offset = page * limit - limit;
   try {
-    const total = await prisma.category.count({
-      where: {
-        isActive: true,
-      },
-    });
+    // const total = await prisma.category.count({
+    //   where: {
+    //     isActive: true,
+    //   },
+    // });
     const categories = await prisma.category.findMany({
-      skip: offset,
-      take: limit,
-      where: {
-        isActive: true,
-      },
+      // skip: offset,
+      // take: limit,
     });
     await prisma.$disconnect();
-    return res
-      .status(200)
-      .json({ data: categories, pages: Math.ceil(total / limit) });
+    return res.status(200).json({ data: categories });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
