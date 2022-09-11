@@ -531,13 +531,11 @@ export const getReturnedBooks = async (req, res) => {
       },
     });
     await prisma.$disconnect();
-    return res
-      .status(200)
-      .json({
-        data: returnedBooks,
-        pages: Math.ceil(total / limit),
-        total,
-      });
+    return res.status(200).json({
+      data: returnedBooks,
+      pages: Math.ceil(total / limit),
+      total,
+    });
   } catch (error) {
     console.log(error);
     await prisma.$disconnect();
